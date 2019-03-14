@@ -33,7 +33,7 @@ function byte(value) {
   });
 };
 
-function byteInRange(lowest, highest) {
+const byteInRange = lowest => highest => {
   return new Parser(state => {
     return state.chain(([index, targetBuffer]) => {
       if (index <= targetBuffer.byteLength) {
