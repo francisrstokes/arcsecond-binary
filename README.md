@@ -5,13 +5,19 @@ Binary parsers for <a href="https://github.com/francisrstokes/arcsecond">arcseco
 - [1. API](#api)
   - [1.1 rawString](#rawString)
   - [1.2 byte](#byte)
-  - [1.3 anyByte](#anyByte)
-  - [1.4 byteInRange](#byteInRange)
-  - [1.5 wordLE](#wordLE)
-  - [1.6 wordBE](#wordBE)
-  - [1.7 doubleWordLE](#doubleWordLE)
-  - [1.8 doubleWordBE](#doubleWordBE)
-  - [1.9 everythingUntil](#everythingUntil)
+  - [1.3 signedByte](#signedbyte)
+  - [1.4 anyByte](#anyByte)
+  - [1.5 byteInRange](#byteInRange)
+  - [1.6 signedByteInRange](#signedbyteInRange)
+  - [1.7 wordLE](#wordLE)
+  - [1.8 signedWordLE](#signedwordLE)
+  - [1.9 wordBE](#wordBE)
+  - [1.10 signedWordBE](#signedwordBE)
+  - [1.11 doubleWordLE](#doubleWordLE)
+  - [1.12 signedDoubleWordLE](#signeddoubleWordLE)
+  - [1.13 doubleWordBE](#doubleWordBE)
+  - [1.14 signedDoubleWordBE](#signeddoubleWordBE)
+  - [1.15 everythingUntil](#everythingUntil)
 
 ## API
 
@@ -33,12 +39,24 @@ parse (rawString ('HELLO')) (Buffer.from([0x48, 0x45, 0x4c, 0x4c, 0x4f]));
 
 `byte :: String -> Parser String a Number`
 
-`byte` takes a number (0-255) and returns a parser that matches that number (max 1 byte) **exactly one** time.
+`byte` takes a number [0, 255] and returns a parser that matches that number (max 1 byte) **exactly one** time.
 
 **Example**
 ```javascript
 parse (byte (0xAF)) (Buffer.from([0xAF, 0x00, 0x00, 0x00]));
 // -> Either.Right(175)
+```
+
+### signedByte
+
+`signedByte :: String -> Parser String a Number`
+
+`signedByte` takes a signed number [-128, 127] and returns a parser that matches that number (max 1 byte) **exactly one** time.
+
+**Example**
+```javascript
+parse (signedByte (-50)) (Buffer.from([0xCE]));
+// -> Either.Right(-50)
 ```
 
 ### anyByte
@@ -61,8 +79,20 @@ parse (anyByte) (Buffer.from([0xAF, 0x00, 0x00, 0x00]));
 
 **Example**
 ```javascript
-parse (byteInRange (0x00) (0x0AA)) (Buffer.from([0x19, 0x00, 0x00, 0x00]));
+parse (byteInRange (0x00) (0x0A)) (Buffer.from([0x19, 0x00, 0x00, 0x00]));
 // -> Either.Right(25)
+```
+
+### signedByteInRange
+
+`signedByteInRange :: Number -> Number -> Parser String a Number`
+
+`signedByteInRange` takes a `lowest` and a `highest` bound, both in range [-128, 127], and returns a parser that matches **exactly one** byte, such that `lowest >= byte <= highest`.
+
+**Example**
+```javascript
+parse (signedByteInRange (-50) (50)) (Buffer.from([0xFD]));
+// -> Either.Right(-3)
 ```
 
 ### wordLE
@@ -77,6 +107,18 @@ parse (wordLE(0xFFEE)) (Buffer.from([0xEE, 0xFF]));
 // -> Either.Right(65518)
 ```
 
+### signedWordLE
+
+`signedWordLE :: Number -> Parser String a Number`
+
+`signedWordLE` takes a signed, little-endian 16-bit number [-32,768, 32,767], and returns a parser that matches **exactly two** bytes.
+
+**Example**
+```javascript
+parse (signedWordLE(-420)) (Buffer.from([0x5C, 0xFE]));
+// -> Either.Right(-420)
+```
+
 ### wordBE
 
 `wordLE :: Number -> Parser String a Number`
@@ -87,6 +129,18 @@ parse (wordLE(0xFFEE)) (Buffer.from([0xEE, 0xFF]));
 ```javascript
 parse (wordLE(0xFFEE)) (Buffer.from([0xFF, 0xEE]));
 // -> Either.Right(65518)
+```
+
+### signedWordBE
+
+`signedWordBE :: Number -> Parser String a Number`
+
+`signedWordBE` takes a signed, big-endian 16-bit number [-32,768, 32,767], and returns a parser that matches **exactly two** bytes.
+
+**Example**
+```javascript
+parse (signedWordBE(-420)) (Buffer.from([0xFE, 0x5C]));
+// -> Either.Right(-420)
 ```
 
 ### doubleWordLE
@@ -101,6 +155,18 @@ parse (doubleWordLE(0xFFEEDDCC)) (Buffer.from([0xCC, 0xDD, 0xEE, 0xFF]));
 // -> Either.Right(4293844428)
 ```
 
+### signedDoubleWordLE
+
+`signedDoubleWordLE :: Number -> Parser String a Number`
+
+`signedDoubleWordLE` takes a signed little-endian 32-bit number [-2,147,483,648, 2,147,483,647], and returns a parser that matches **exactly four** bytes.
+
+**Example**
+```javascript
+parse (signedDoubleWordLE(-1234567)) (Buffer.from([0x79, 0x29, 0xED, 0xFF]));
+// -> Either.Right(-1234567)
+```
+
 ### doubleWordBE
 
 `doubleWordLE :: Number -> Parser String a Number`
@@ -111,6 +177,18 @@ parse (doubleWordLE(0xFFEEDDCC)) (Buffer.from([0xCC, 0xDD, 0xEE, 0xFF]));
 ```javascript
 parse (doubleWordLE(0xFFEEDDCC)) (Buffer.from([0xFF, 0xEE, 0xDD, 0xCC]));
 // -> Either.Right(4293844428)
+```
+
+### signedDoubleWordBE
+
+`signedDoubleWordBE :: Number -> Parser String a Number`
+
+`signedDoubleWordBE` takes a signed big-endian 32-bit number [-2,147,483,648, 2,147,483,647], and returns a parser that matches **exactly four** bytes.
+
+**Example**
+```javascript
+parse (signedDoubleWordBE(-1234567)) (Buffer.from([0xFF, 0xED, 0x29, 0x79]));
+// -> Either.Right(-1234567)
 ```
 
 ### everythingUntil

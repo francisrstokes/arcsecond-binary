@@ -23,10 +23,25 @@ function byte(value) {
   return new Parser(state => {
     return state.chain(([index, targetBuffer]) => {
       if (index <= targetBuffer.byteLength) {
-        if (!targetBuffer[index] === value) {
+        if (targetBuffer[index] !== value) {
           return Left ([index, `ParseError (position ${index}): Expecting 0x${value.toString(16)}], got 0x${targetBuffer[i].toString(16)}]`]);
         }
         return Right ([index + 1, targetBuffer, value]);
+      }
+      return Left ([index, `ParseError (position ${index}): Unexpected end of input `]);
+    })
+  });
+};
+
+function signedByte(value) {
+  return new Parser(state => {
+    return state.chain(([index, targetBuffer]) => {
+      if (index <= targetBuffer.byteLength) {
+        const byte = targetBuffer.readInt8(index)
+        if (byte !== value) {
+          return Left ([index, `ParseError (position ${index}): Expecting 0x${value.toString(16)}], got 0x${targetBuffer[i].toString(16)}]`]);
+        }
+        return Right ([index + 1, targetBuffer, byte]);
       }
       return Left ([index, `ParseError (position ${index}): Unexpected end of input `]);
     })
@@ -41,6 +56,21 @@ const byteInRange = lowest => highest => {
           return Left ([index, `ParseError (position ${index}): Expecting byte in range [0x${lowest.toString(16)}], 0x${highest.toString(16)}]. Got 0x${targetBuffer[i].toString(16)}]`]);
         }
         return Right ([index + 1, targetBuffer, targetBuffer[index]]);
+      }
+      return Left ([index, `ParseError (position ${index}): Unexpected end of input `]);
+    })
+  });
+};
+
+const signedByteInRange = lowest => highest => {
+  return new Parser(state => {
+    return state.chain(([index, targetBuffer]) => {
+      if (index <= targetBuffer.byteLength) {
+        const byte = targetBuffer.readInt8(index);
+        if (!(byte >= lowest && byte <= highest)) {
+          return Left ([index, `ParseError (position ${index}): Expecting byte in range [0x${lowest.toString(16)}], 0x${highest.toString(16)}]. Got 0x${targetBuffer[i].toString(16)}]`]);
+        }
+        return Right ([index + 1, targetBuffer, byte]);
       }
       return Left ([index, `ParseError (position ${index}): Unexpected end of input `]);
     })
@@ -71,6 +101,21 @@ function wordLE(value) {
   });
 };
 
+function signedWordLE(value) {
+  return new Parser(state => {
+    return state.chain(([index, targetBuffer]) => {
+      if (index + 1 <= targetBuffer.byteLength) {
+        const dvValue = targetBuffer.readInt16LE(index);
+        if (dvValue !== value) {
+          return Left ([index, `ParseError (position ${index}): Expecting 0x${value.toString(16)}, got 0x${dvValue.toString(16)}`]);
+        }
+        return Right ([index + 1, targetBuffer, value]);
+      }
+      return Left ([index, `ParseError (position ${index}): Unexpected end of input `]);
+    })
+  });
+};
+
 function wordBE(value) {
   return new Parser(state => {
     return state.chain(([index, targetBuffer]) => {
@@ -86,11 +131,26 @@ function wordBE(value) {
   });
 };
 
-function doubleWordLE(value) {
+function signedWordBE(value) {
+  return new Parser(state => {
+    return state.chain(([index, targetBuffer]) => {
+      if (index + 1 <= targetBuffer.byteLength) {
+        const dvValue = targetBuffer.readInt16BE(index);
+        if (dvValue !== value) {
+          return Left ([index, `ParseError (position ${index}): Expecting 0x${value.toString(16)}, got 0x${dvValue.toString(16)}`]);
+        }
+        return Right ([index + 1, targetBuffer, value]);
+      }
+      return Left ([index, `ParseError (position ${index}): Unexpected end of input `]);
+    })
+  });
+};
+
+function signedDoubleWordLE(value) {
   return new Parser(state => {
     return state.chain(([index, targetBuffer]) => {
       if (index + 3 <= targetBuffer.byteLength) {
-        const dvValue = targetBuffer.readUInt32LE(index);
+        const dvValue = targetBuffer.readInt32LE(index);
         if (dvValue !== value) {
           return Left ([index, `ParseError (position ${index}): Expecting 0x${value.toString(16)}, got 0x${dvValue.toString(16)}`]);
         }
@@ -101,11 +161,11 @@ function doubleWordLE(value) {
   });
 };
 
-function doubleWordBE(value) {
+function signedDoubleWordBE(value) {
   return new Parser(state => {
     return state.chain(([index, targetBuffer]) => {
       if (index + 3 <= targetBuffer.byteLength) {
-        const dvValue = targetBuffer.readUInt32BE(index);
+        const dvValue = targetBuffer.readInt32BE(index);
         if (dvValue !== value) {
           return Left ([index, `ParseError (position ${index}): Expecting 0x${value.toString(16)}, got 0x${dvValue.toString(16)}`]);
         }
@@ -147,11 +207,17 @@ function everythingUntil(parser) {
 module.exports = {
   rawString,
   byte,
+  signedByte,
   anyByte,
   byteInRange,
+  signedByteInRange,
   wordLE,
+  signedWordLE,
   wordBE,
+  signedWordBE,
   doubleWordLE,
+  signedDoubleWordLE,
   doubleWordBE,
+  signedDoubleWordBE,
   everythingUntil
 };
