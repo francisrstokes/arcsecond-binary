@@ -2,6 +2,21 @@
 
 Binary parsers for <a href="https://github.com/francisrstokes/arcsecond">arcsecond</a>!
 
+- [1. API](#api)
+  - [1.1 rawString](#rawString)
+  - [1.2 byte](#byte)
+  - [1.3 anyByte](#anyByte)
+  - [1.4 byteInRange](#byteInRange)
+  - [1.5 wordLE](#wordLE)
+  - [1.6 wordBE](#wordBE)
+  - [1.7 doubleWordLE](#doubleWordLE)
+  - [1.8 doubleWordBE](#doubleWordBE)
+  - [1.9 everythingUntil](#everythingUntil)
+
+## API
+
+<a href="https://github.com/francisrstokes/arcsecond#api">Click here for the main `arcsecond` API docs.</a> Most of the parsers there (for example `many`, `sepBy`, `anythingExcept`, `endOfInput` etc) will work with the binary parsers.
+
 ### rawString
 
 `rawString :: String -> Parser String a Buffer`
