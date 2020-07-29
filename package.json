@@ -1,6 +1,6 @@
 {
   "name": "arcsecond-binary",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "arcsecond parsers for binary data",
   "main": "src/index.js",
   "scripts": {
@@ -11,6 +11,5 @@
   "peerDependencies": {
     "arcsecond": ">=2.0.4"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
