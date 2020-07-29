@@ -1,206 +1,476 @@
-# arcsecond-binary
+# Arcsecond Binary
 
-Binary parsers for <a href="https://github.com/francisrstokes/arcsecond">arcsecond</a>!
+Binary parsers for <a href="https://github.com/francisrstokes/arcsecond">arcsecond v2</a>!
 
 - [1. API](#api)
-  - [1.1 rawString](#rawString)
-  - [1.2 byte](#byte)
-  - [1.3 signedByte](#signedbyte)
-  - [1.4 anyByte](#anyByte)
-  - [1.5 byteInRange](#byteInRange)
-  - [1.6 signedByteInRange](#signedbyteInRange)
-  - [1.7 wordLE](#wordLE)
-  - [1.8 signedWordLE](#signedwordLE)
-  - [1.9 wordBE](#wordBE)
-  - [1.10 signedWordBE](#signedwordBE)
-  - [1.11 doubleWordLE](#doubleWordLE)
-  - [1.12 signedDoubleWordLE](#signeddoubleWordLE)
-  - [1.13 doubleWordBE](#doubleWordBE)
-  - [1.14 signedDoubleWordBE](#signeddoubleWordBE)
-  - [1.15 everythingUntil](#everythingUntil)
+  - [1.1 u8](#u8)
+  - [1.2 s8](#s8)
+  - [1.3 u16LE](#u16LE)
+  - [1.4 u16BE](#u16BE)
+  - [1.5 s16LE](#s16LE)
+  - [1.6 s16BE](#s16BE)
+  - [1.7 u32LE](#u32LE)
+  - [1.8 u32BE](#u32BE)
+  - [1.9 s32LE](#s32LE)
+  - [1.10 s32BE](#s32BE)
+  - [1.11 exactU8](#exactU8)
+  - [1.12 exactS8](#exactS8)
+  - [1.13 exactU16LE](#exactU16LE)
+  - [1.14 exactU16BE](#exactU16BE)
+  - [1.15 exactS16LE](#exactS16LE)
+  - [1.16 exactS16BE](#exactS16BE)
+  - [1.17 exactU32LE](#exactU32LE)
+  - [1.18 exactU32BE](#exactU32BE)
+  - [1.19 exactS32LE](#exactS32LE)
+  - [1.20 exactS32BE](#exactS32BE)
+  - [1.21 rawString](#rawString)
+  - [1.22 nullTerminatedString](#nullTerminatedString)
 
 ## API
 
-<a href="https://github.com/francisrstokes/arcsecond#api">Click here for the main `arcsecond` API docs.</a> Most of the parsers there (for example `many`, `sepBy`, `anythingExcept`, `endOfInput` etc) will work with the binary parsers.
+<a href="https://github.com/francisrstokes/arcsecond#api">Click here for the main `arcsecond` API docs.</a> Many of the parser combinators (for example `many`, `sepBy`, `anythingExcept`, `endOfInput` etc) will work with the binary parsers,  but any that specifically assume that the input is a string will not (for example `string`, `letters`, `regex` etc).
+
+### u8
+
+`u8 :: Parser String Number DataView`
+
+`u8` consumes **exactly one** byte, and returns a match that interprets the result as an unsigned integer in the range [0, 255].
+
+**Example**
+```javascript
+const input = new Uint8Array([0x48, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+u8.run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 72,
+//      index: 1,
+//      data: null
+//    }
+```
+
+### s8
+
+`s8 :: Parser String Number DataView`
+
+`s8` consumes **exactly one** byte, and returns a match that interprets the result as an unsigned integer in the range [-128, 127].
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+s8.run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: -106,
+//      index: 1,
+//      data: null
+//    }
+```
+
+### u16LE
+
+`u16LE :: Parser String Number DataView`
+
+`u16LE` consumes **exactly two** bytes, read in little endian order, and returns a match that interprets the result as an unsigned integer in the range [0, 65535].
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+u16LE.run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 17814,
+//      index: 2,
+//      data: null
+//    }
+```
+
+### u16BE
+
+`u16BE :: Parser String Number DataView`
+
+`u16BE` consumes **exactly two** bytes, read in big endian order, and returns a match that interprets the result as an unsigned integer in the range [0, 65535].
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+u16BE.run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 38469,
+//      index: 2,
+//      data: null
+//    }
+```
+
+### s16LE
+
+`s16LE :: Parser String Number DataView`
+
+`s16LE` consumes **exactly two** bytes, read in little endian order, and returns a match that interprets the result as a signed integer in the range [-32768, 32767].
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+s16LE.run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 17814,
+//      index: 2,
+//      data: null
+//    }
+```
+
+### s16BE
+
+`s16BE :: Parser String Number DataView`
+
+`s16BE` consumes **exactly two** bytes, read in big endian order, and returns a match that interprets the result as a signed integer in the range [-32768, 32767].
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+s16BE.run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: -27067,
+//      index: 2,
+//      data: null
+//    }
+```
+
+### u32LE
+
+`u32LE :: Parser String Number DataView`
+
+`u32LE` consumes **exactly four** bytes, read in little endian order, and returns a match that interprets the result as an unsigned integer in the range [0, 4294967295].
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+u32LE.run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 1280066966,
+//      index: 4,
+//      data: null
+//    }
+```
+
+### u32BE
+
+`u32BE :: Parser String Number DataView`
+
+`u32BE` consumes **exactly four** bytes, read in big endian order, and returns a match that interprets the result as an unsigned integer in the range [0, 4294967295].
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+u32BE.run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 2521123916,
+//      index: 4,
+//      data: null
+//    }
+```
+
+### s32LE
+
+`s32LE :: Parser String Number DataView`
+
+`s32LE` consumes **exactly four** bytes, read in little endian order, and returns a match that interprets the result as a signed integer in the range [-2147483648, 2147483647].
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+s32LE.run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 1280066966,
+//      index: 4,
+//      data: null
+//    }
+```
+
+### s32BE
+
+`s32BE :: Parser String Number DataView`
+
+`s32BE` consumes **exactly four** bytes, read in big endian order, and returns a match that interprets the result as a signed integer in the range [-2147483648, 2147483647].
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+s32BE.run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: -1773843380,
+//      index: 4,
+//      data: null
+//    }
+```
+
+### exactU8
+
+`exactU8 :: UnsignedByte -> Parser String Number DataView`
+
+`exactU8` takes an unsigned byte `b`, and consumes **exactly one** byte, matching a value equal to `b`, when interpreted as an unsigned integer.
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+exactU8(0x96).run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 150,
+//      index: 1,
+//      data: null
+//    }
+```
+
+### exactS8
+
+`exactS8 :: SignedByte -> Parser String Number DataView`
+
+`exactS8` takes a signed byte `b`, and consumes **exactly one** byte, matching a value equal to `b`, when interpreted as a signed integer.
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+exactS8(-106).run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: -106,
+//      index: 1,
+//      data: null
+//    }
+```
+
+### exactU16LE
+
+`exactU16LE :: UnsignedU16 -> Parser String Number DataView`
+
+`exactU16LE` takes an unsigned 16-bit number `b`, and consumes **exactly two** bytes, matching a value equal to `b`, when interpreted as an unsigned integer in little endian order.
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+exactU16LE(0x4596).run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 17814,
+//      index: 1,
+//      data: null
+//    }
+```
+
+### exactU16BE
+
+`exactU16BE :: UnsignedU16 -> Parser String Number DataView`
+
+`exactU16BE` takes an unsigned 16-bit number `b`, and consumes **exactly two** bytes, matching a value equal to `b`, when interpreted as an unsigned integer in big endian order.
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+exactU16BE(0x9645).run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 38469,
+//      index: 1,
+//      data: null
+//    }
+```
+
+### exactS16LE
+
+`exactS16LE :: SignedU16 -> Parser String Number DataView`
+
+`exactS16LE` takes an signed 16-bit number `b`, and consumes **exactly two** bytes, matching a value equal to `b`, when interpreted as a signed integer in little endian order.
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+exactS16LE(17814).run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 17814,
+//      index: 1,
+//      data: null
+//    }
+```
+
+### exactS16BE
+
+`exactS16BE :: SignedU16 -> Parser String Number DataView`
+
+`exactS16BE` takes an signed 16-bit number `b`, and consumes **exactly two** bytes, matching a value equal to `b`, when interpreted as a signed integer in big endian order.
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+exactS16BE(-27067).run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: -27067,
+//      index: 1,
+//      data: null
+//    }
+```
+
+
+
+
+
+### exactU32LE
+
+`exactU32LE :: UnsignedU32 -> Parser String Number DataView`
+
+`exactU32LE` takes an unsigned 32-bit number `b`, and consumes **exactly four** bytes, matching a value equal to `b`, when interpreted as an unsigned integer in little endian order.
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+exactU32LE(0x4c4c4596).run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 1280066966,
+//      index: 1,
+//      data: null
+//    }
+```
+
+### exactU32BE
+
+`exactU32BE :: UnsignedU32 -> Parser String Number DataView`
+
+`exactU32BE` takes an unsigned 32-bit number `b`, and consumes **exactly four** bytes, matching a value equal to `b`, when interpreted as an unsigned integer in big endian order.
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+exactU32BE(0x96454c4c).run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 2521123916,
+//      index: 1,
+//      data: null
+//    }
+```
+
+### exactS32LE
+
+`exactS32LE :: SignedU32 -> Parser String Number DataView`
+
+`exactS32LE` takes an signed 32-bit number `b`, and consumes **exactly four** bytes, matching a value equal to `b`, when interpreted as a signed integer in little endian order.
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+exactS32LE(1280066966).run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 1280066966,
+//      index: 1,
+//      data: null
+//    }
+```
+
+### exactS32BE
+
+`exactS32BE :: SignedU32 -> Parser String Number DataView`
+
+`exactS32BE` takes an signed 32-bit number `b`, and consumes **exactly four** bytes, matching a value equal to `b`, when interpreted as a signed integer in big endian order.
+
+**Example**
+```javascript
+const input = new Uint8Array([0x96, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+exactS32BE(-1773843380).run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: -1773843380,
+//      index: 1,
+//      data: null
+//    }
+```
+
 
 ### rawString
 
-`rawString :: String -> Parser String a Buffer`
+`rawString :: String -> Parser String String DataView`
 
-`rawString` takes a string and returns a parser that matches the binary representation **exactly one** time.
+`rawString` takes a string `s`, and consumes **exactly as many bytes as `s` is long**, matching a value equal to `s`, when interpreted as a string data.
 
 **Example**
 ```javascript
-parse (rawString ('HELLO')) (Buffer.from([0x48, 0x45, 0x4c, 0x4c, 0x4f]));
-// -> Either.Right(<Buffer 48 45 4c 4c 4f>)
+const input = new Uint8Array([0x48, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+rawString('HELLO').run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 'HELLO',
+//      index: 1,
+//      data: null
+//    }
 ```
 
-### byte
+### nullTerminatedString
 
-`byte :: String -> Parser String a Number`
+`nullTerminatedString :: Parser String String DataView`
 
-`byte` takes a number [0, 255] and returns a parser that matches that number (max 1 byte) **exactly one** time.
-
-**Example**
-```javascript
-parse (byte (0xAF)) (Buffer.from([0xAF, 0x00, 0x00, 0x00]));
-// -> Either.Right(175)
-```
-
-### signedByte
-
-`signedByte :: String -> Parser String a Number`
-
-`signedByte` takes a signed number [-128, 127] and returns a parser that matches that number (max 1 byte) **exactly one** time.
+`nullTerminatedString` consumes **as much input as possible** until it matches a null byte (`0x00`), matching a string made from the bytes interpreted as string data.
 
 **Example**
 ```javascript
-parse (signedByte (-50)) (Buffer.from([0xCE]));
-// -> Either.Right(-50)
-```
+const input = new Uint8Array([0x48, 0x45, 0x4c, 0x4c, 0x4f, 0x2e, 0x2e, 0x2e, 0x00]);
+const dataViewOfInput = new DataView(input);
 
-### anyByte
-
-`anyByte :: Parser String a Number`
-
-`anyByte` is a parser that matches a 1 byte number **exactly one** time.
-
-**Example**
-```javascript
-parse (anyByte) (Buffer.from([0xAF, 0x00, 0x00, 0x00]));
-// -> Either.Right(175)
-```
-
-### byteInRange
-
-`byteInRange :: Number -> Number -> Parser String a Number`
-
-`byteInRange` takes a `lowest` and a `highest` bound, and returns a parser that matches **exactly one** byte, such that `lowest >= byte <= highest`.
-
-**Example**
-```javascript
-parse (byteInRange (0x00) (0x0A)) (Buffer.from([0x19, 0x00, 0x00, 0x00]));
-// -> Either.Right(25)
-```
-
-### signedByteInRange
-
-`signedByteInRange :: Number -> Number -> Parser String a Number`
-
-`signedByteInRange` takes a `lowest` and a `highest` bound, both in range [-128, 127], and returns a parser that matches **exactly one** byte, such that `lowest >= byte <= highest`.
-
-**Example**
-```javascript
-parse (signedByteInRange (-50) (50)) (Buffer.from([0xFD]));
-// -> Either.Right(-3)
-```
-
-### wordLE
-
-`wordLE :: Number -> Parser String a Number`
-
-`wordLE` takes a little-endian 16-bit number, and returns a parser that matches **exactly two** bytes.
-
-**Example**
-```javascript
-parse (wordLE(0xFFEE)) (Buffer.from([0xEE, 0xFF]));
-// -> Either.Right(65518)
-```
-
-### signedWordLE
-
-`signedWordLE :: Number -> Parser String a Number`
-
-`signedWordLE` takes a signed, little-endian 16-bit number [-32,768, 32,767], and returns a parser that matches **exactly two** bytes.
-
-**Example**
-```javascript
-parse (signedWordLE(-420)) (Buffer.from([0x5C, 0xFE]));
-// -> Either.Right(-420)
-```
-
-### wordBE
-
-`wordLE :: Number -> Parser String a Number`
-
-`wordLE` takes a big-endian 16-bit number, and returns a parser that matches **exactly two** bytes.
-
-**Example**
-```javascript
-parse (wordLE(0xFFEE)) (Buffer.from([0xFF, 0xEE]));
-// -> Either.Right(65518)
-```
-
-### signedWordBE
-
-`signedWordBE :: Number -> Parser String a Number`
-
-`signedWordBE` takes a signed, big-endian 16-bit number [-32,768, 32,767], and returns a parser that matches **exactly two** bytes.
-
-**Example**
-```javascript
-parse (signedWordBE(-420)) (Buffer.from([0xFE, 0x5C]));
-// -> Either.Right(-420)
-```
-
-### doubleWordLE
-
-`doubleWordLE :: Number -> Parser String a Number`
-
-`doubleWordLE` takes a little-endian 32-bit number, and returns a parser that matches **exactly four** bytes.
-
-**Example**
-```javascript
-parse (doubleWordLE(0xFFEEDDCC)) (Buffer.from([0xCC, 0xDD, 0xEE, 0xFF]));
-// -> Either.Right(4293844428)
-```
-
-### signedDoubleWordLE
-
-`signedDoubleWordLE :: Number -> Parser String a Number`
-
-`signedDoubleWordLE` takes a signed little-endian 32-bit number [-2,147,483,648, 2,147,483,647], and returns a parser that matches **exactly four** bytes.
-
-**Example**
-```javascript
-parse (signedDoubleWordLE(-1234567)) (Buffer.from([0x79, 0x29, 0xED, 0xFF]));
-// -> Either.Right(-1234567)
-```
-
-### doubleWordBE
-
-`doubleWordLE :: Number -> Parser String a Number`
-
-`doubleWordLE` takes a big-endian 32-bit number, and returns a parser that matches **exactly four** bytes.
-
-**Example**
-```javascript
-parse (doubleWordLE(0xFFEEDDCC)) (Buffer.from([0xFF, 0xEE, 0xDD, 0xCC]));
-// -> Either.Right(4293844428)
-```
-
-### signedDoubleWordBE
-
-`signedDoubleWordBE :: Number -> Parser String a Number`
-
-`signedDoubleWordBE` takes a signed big-endian 32-bit number [-2,147,483,648, 2,147,483,647], and returns a parser that matches **exactly four** bytes.
-
-**Example**
-```javascript
-parse (signedDoubleWordBE(-1234567)) (Buffer.from([0xFF, 0xED, 0x29, 0x79]));
-// -> Either.Right(-1234567)
-```
-
-### everythingUntil
-
-`everythingUntil :: Parser String a b -> Parser String a [Number]`
-
-`everythingUntil` takes a *termination* parser and returns a new parser which matches everything up until a value is matched by the *termination* parser. When a value is matched by the *termination* parser, it is not "consumed".
-
-**Note**: The difference between this function and the `everythingUntil` in arcsecond is that this function does not concatenate the results into a string, but instead returns an array.
-
-**Example**
-```javascript
-parse (everythingUntil(byte(0xFF))) (Buffer.from([0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0xFF]));
-// -> Either.Right([1, 1, 1, 1, 1, 1, 1])
+nullTerminatedString.run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 'HELLO...',
+//      index: 1,
+//      data: null
+//    }
 ```
