@@ -2,6 +2,8 @@
 
 Binary parsers for <a href="https://github.com/francisrstokes/arcsecond">arcsecond v2</a>!
 
+Before opening an issue, check to see if your question has been answered in the [FAQ](./faq.md)!
+
 - [1. API](#api)
   - [1.1 u8](#u8)
   - [1.2 s8](#s8)
