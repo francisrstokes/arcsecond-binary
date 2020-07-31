@@ -56,7 +56,7 @@ u8.run(dataViewOfInput);
 
 `s8 :: Parser String Number DataView`
 
-`s8` consumes **exactly one** byte, and returns a match that interprets the result as an unsigned integer in the range [-128, 127].
+`s8` consumes **exactly one** byte, and returns a match that interprets the result as a signed integer in the range [-128, 127].
 
 **Example**
 ```javascript
