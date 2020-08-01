@@ -4,29 +4,60 @@ Binary parsers for <a href="https://github.com/francisrstokes/arcsecond">arcseco
 
 Before opening an issue, check to see if your question has been answered in the [FAQ](./faq.md)!
 
-- [1. API](#api)
-  - [1.1 u8](#u8)
-  - [1.2 s8](#s8)
-  - [1.3 u16LE](#u16LE)
-  - [1.4 u16BE](#u16BE)
-  - [1.5 s16LE](#s16LE)
-  - [1.6 s16BE](#s16BE)
-  - [1.7 u32LE](#u32LE)
-  - [1.8 u32BE](#u32BE)
-  - [1.9 s32LE](#s32LE)
-  - [1.10 s32BE](#s32BE)
-  - [1.11 exactU8](#exactU8)
-  - [1.12 exactS8](#exactS8)
-  - [1.13 exactU16LE](#exactU16LE)
-  - [1.14 exactU16BE](#exactU16BE)
-  - [1.15 exactS16LE](#exactS16LE)
-  - [1.16 exactS16BE](#exactS16BE)
-  - [1.17 exactU32LE](#exactU32LE)
-  - [1.18 exactU32BE](#exactU32BE)
-  - [1.19 exactS32LE](#exactS32LE)
-  - [1.20 exactS32BE](#exactS32BE)
-  - [1.21 rawString](#rawString)
-  - [1.22 nullTerminatedString](#nullTerminatedString)
+- [1. Parser Input](#Parser-Input)
+- [2. API](#api)
+  <details>
+  <summary>Click to view API table of contents</summary>
+
+  - [2.1 u8](#u8)
+  - [2.2 s8](#s8)
+  - [2.3 u16LE](#u16LE)
+  - [2.4 u16BE](#u16BE)
+  - [2.5 s16LE](#s16LE)
+  - [2.6 s16BE](#s16BE)
+  - [2.7 u32LE](#u32LE)
+  - [2.8 u32BE](#u32BE)
+  - [2.9 s32LE](#s32LE)
+  - [2.10 s32BE](#s32BE)
+  - [2.11 exactU8](#exactU8)
+  - [2.12 exactS8](#exactS8)
+  - [2.13 exactU16LE](#exactU16LE)
+  - [2.14 exactU16BE](#exactU16BE)
+  - [2.15 exactS16LE](#exactS16LE)
+  - [2.16 exactS16BE](#exactS16BE)
+  - [2.17 exactU32LE](#exactU32LE)
+  - [2.18 exactU32BE](#exactU32BE)
+  - [2.19 exactS32LE](#exactS32LE)
+  - [2.20 exactS32BE](#exactS32BE)
+  - [2.21 rawString](#rawString)
+  - [2.22 nullTerminatedString](#nullTerminatedString)
+
+  </details>
+
+## Parser Input
+
+The input for an `arcsecond-binary` parser is a [DataView](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView). A `DataView` can be created from an `ArrayBuffer`, which is the underlying representation of essentially every [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) or [Node Buffer](https://nodejs.org/api/buffer.html).
+
+### If you have an ArrayBuffer
+
+```javascript
+new DataView(anArrayBuffer);
+```
+
+### If you have a Node Buffer
+
+Although the underlying representation of a node `Buffer` is an `ArrayBuffer`, when accessing the the `ArrayBuffer` through the `.buffer` property, the data may not be as expected. If the buffer size is smaller than node's default pool size, then the `ArrayBuffer` will be created with the pool size, and the actual data will be somewhere inside the `ArrayBuffer`, with seemingly random data surrounding it. To avoid these issues, it's best to first cast a node `Buffer` to a `Uint8Array`, will will ensure that the `ArrayBuffer` properly correlates to the expected data.
+
+```javascript
+const asUint8Array = new Uint8Array(nodeBuffer);
+new DataView(asUint8Array.buffer);
+```
+
+### If you have a TypedArray (Uint16Array, Int32Array, Float32Array, etc)
+
+```javascript
+new DataView(typedArray.buffer);
+```
 
 ## API
 
