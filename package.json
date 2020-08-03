@@ -4,12 +4,19 @@
   "description": "arcsecond parsers for binary data",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha index.test.js",
+    "test:coverage": "nyc --reporter=text --reporter=lcov mocha index.test.js"
   },
   "author": "Francis Stokes",
   "license": "MIT",
   "peerDependencies": {
     "arcsecond": ">=2.0.4"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "arcsecond": "^2.0.4",
+    "chai": "^4.2.0",
+    "mocha": "^8.1.0",
+    "nyc": "^15.1.0"
+  }
 }
