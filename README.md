@@ -1,5 +1,7 @@
 # Arcsecond Binary
 
+<img src="./logo.png">
+
 Binary parsers for <a href="https://github.com/francisrstokes/arcsecond">arcsecond v2</a>!
 
 Before opening an issue, check to see if your question has been answered in the [FAQ](./faq.md)!
