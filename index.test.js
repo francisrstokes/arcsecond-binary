@@ -197,3 +197,45 @@ describe('parsers with constraints', () => {
     B.rawString('hello')
   );
 });
+
+describe('reimplemented parsers from arcsecond', () => {
+  parserTest('endOfInput',
+    [0x01, 0x02],
+    [1, 2, null],
+    A.sequenceOf([
+      B.u8,
+      B.u8,
+      B.endOfInput
+    ])
+  );
+
+  expectedFailureTest('endOfInput: fail',
+    [0x01],
+    'Expected end of input, but got 1 instead',
+    B.endOfInput
+  );
+
+  parserTest('everythingUntil',
+    [0x01, 0x02, 0x03, 0x04, 0x05, 0x06],
+    [1, 2, 3, 4],
+    B.everythingUntil(B.exactU16BE(0x0506))
+  );
+
+  expectedFailureTest('everythingUntil: fail',
+    [0x01, 0x02, 0x03],
+    'everythingUntil: Unexpected end of input',
+    B.everythingUntil(B.exactU16BE(0x0506))
+  );
+
+  parserTest('anythingExcept',
+    [0x01, 0x02],
+    1,
+    B.anythingExcept(B.exactU16BE(0x0506))
+  );
+
+  expectedFailureTest('anythingExcept: fail',
+    [0x01, 0x02, 0x03],
+    'anythingExcept: Matched 1 from the exception parser',
+    B.anythingExcept(B.exactU8(0x01))
+  );
+});

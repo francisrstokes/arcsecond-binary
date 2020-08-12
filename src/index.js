@@ -80,6 +80,45 @@ const nullTerminatedString = new Parser(state => {
   return updateResultAndIndex(state, str, state.index + offset);
 });
 
+const endOfInput = new Parser(state => {
+  if (isError(state)) return state;
+  if (canReadBytes(state, 1)) {
+    return updateError(state, `Expected end of input, but got ${state.target.getUint8(state.index)} instead`);
+  }
+  return updateResultAndIndex(state, null, state.index);
+});
+
+const everythingUntil = parser => new Parser(state => {
+  if (isError(state)) return state;
+  const collected = [];
+
+  let nextState = state;
+  while (true) {
+    const reachedEndState = parser.p(nextState);
+    if (!reachedEndState.isError) {
+      return updateResultAndIndex(nextState, collected, nextState.index);
+    }
+
+    if (!canReadBytes(nextState, 1)) {
+      return updateError(nextState, `everythingUntil: Unexpected end of input`);
+    }
+
+    collected.push(nextState.target.getUint8(nextState.index));
+    nextState = updateResultAndIndex(nextState, null, nextState.index + 1);
+  }
+});
+
+const anythingExcept = exceptionParser => new Parser(state => {
+  if (isError(state)) return state;
+  const exceptionState = exceptionParser.p(state);
+  if (!exceptionState.isError) {
+    return updateError(state, `anythingExcept: Matched ${exceptionState.result} from the exception parser`);
+  }
+
+  const byte = state.target.getUint8(state.index);
+  return updateResultAndIndex(state, byte, state.index + 1);
+});
+
 module.exports = {
   u8,
   s8,
@@ -103,4 +142,7 @@ module.exports = {
   exactS32BE,
   rawString,
   nullTerminatedString,
+  endOfInput,
+  everythingUntil,
+  anythingExcept,
 };
