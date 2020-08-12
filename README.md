@@ -33,6 +33,9 @@ Before opening an issue, check to see if your question has been answered in the 
   - [2.20 exactS32BE](#exactS32BE)
   - [2.21 rawString](#rawString)
   - [2.22 nullTerminatedString](#nullTerminatedString)
+  - [2.23 endOfInput](#endOfInput)
+  - [2.24 anythingExcept](#anythingExcept)
+  - [2.25 everythingUntil](#everythingUntil)
 
   </details>
 
@@ -505,6 +508,71 @@ nullTerminatedString.run(dataViewOfInput);
 // -> {
 //      isError: false,
 //      result: 'HELLO...',
+//      index: 1,
+//      data: null
+//    }
+```
+
+### endOfInput
+
+`endOfInput :: Parser String null DataView`
+
+`endOfInput` succeeds when there is no more input to consume, and fails when there is. The value it returns is always `null`.
+
+**Example**
+```javascript
+const input = new Uint8Array([0x48, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+const parser = A.sequenceOf([
+  rawString('HELLO'),
+  endOfInput
+]);
+
+parser.run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: ['HELLO', null],
+//      index: 1,
+//      data: null
+//    }
+```
+
+### anythingExcept
+
+`anythingExcept :: Parser e a DataView -> Parser String Number DataView`
+
+`anythingExcept` takes a *exception* parser and returns a new parser which matches **exactly one** byte, if it is not matched by the *exception* parser.
+
+**Example**
+```javascript
+const input = new Uint8Array([0x48, 0x45, 0x4c, 0x4c, 0x4f]);
+const dataViewOfInput = new DataView(input);
+
+anythingExcept(exactU8(0x01)).run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: 72,
+//      index: 1,
+//      data: null
+//    }
+```
+
+### everythingUntil
+
+`everythingUntil :: Parser e a DataView -> Parser String [Number] DataView`
+
+`everythingUntil` takes a *termination* parser and returns a new parser which matches **unsigned bytes** up until a value is matched by the *termination* parser. When a value is matched by the *termination* parser, it is not "consumed".
+
+**Example**
+```javascript
+const input = new Uint8Array([0x48, 0x45, 0x4c, 0x4c, 0x4f, 0xc0, 0xde]);
+const dataViewOfInput = new DataView(input);
+
+everythingUntil(exactU16BE(0xc0de)).run(dataViewOfInput);
+// -> {
+//      isError: false,
+//      result: [72, 69, 76, 76, 79],
 //      index: 1,
 //      data: null
 //    }
