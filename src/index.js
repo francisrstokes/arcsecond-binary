@@ -2,7 +2,7 @@ const A = require('arcsecond');
 const Parser = A.Parser;
 
 const isError = state => state.isError;
-const canReadBytes = (state, n, offset = 0) => state.index + n + offset <= state.target.byteLength;
+const canReadBytes = (state, n, offset = 0) => state.index + n + offset <= state.dataView.byteLength;
 const updateError = (state, error) => ({ ...state, isError: true, error });
 const updateResultAndIndex = (state, result, index) => ({ ...state, result, index });
 
@@ -20,7 +20,7 @@ const parseExact = (name, expectaction) => reality => {
 }
 
 const bufferRead = (name, bytes, method, littleEndian) => needNBytes(bytes, name, state =>
-  updateResultAndIndex(state, state.target[method](state.index, littleEndian), state.index + bytes)
+  updateResultAndIndex(state, state.dataView[method](state.index, littleEndian), state.index + bytes)
 );
 
 const u8 = bufferRead('u8', 1, 'getUint8');
@@ -45,78 +45,25 @@ const exactU32BE = expected => u32BE.chain(parseExact('u32BE', expected));
 const exactS32LE = expected => s32LE.chain(parseExact('s32LE', expected));
 const exactS32BE = expected => s32BE.chain(parseExact('s32BE', expected));
 
-const rawString = string => needNBytes(string.length, 'rawString', state => {
-  const bytes = Array.from({length: string.length}, (_, i) => {
-    return state.target.getUint8(state.index + i);
-  });
-
-  const match = bytes.every((byte, i) => byte === string.charCodeAt(i));
-
-  if (!match) {
-    return updateError(state, `Couldn't read raw string "${string}", got "${bytes.map(x => String.fromCharCode(x)).join('')}"`);
-  }
-
-  return updateResultAndIndex(state, string, state.index + string.length);
-});
-
-const nullTerminatedString = new Parser(state => {
-  if (isError(state)) return state;
-
-  let str = '';
-  let offset = 0;
-  let byte;
+const nullTerminatedString = A.coroutine(function* () {
+  let out = '';
+  const errorMsg = 'nullTerminatedString: Unexpected end of input';
 
   while (true) {
-    if (!canReadBytes(state, 1, offset)) {
-      return updateError(state, `nullTerminatedString: Unexpected end of input`);
-    }
-    byte = state.target.getUint8(state.index + offset++);
-    if (byte === 0) {
+    const isZero = yield A.peek.errorMap(() => errorMsg);
+    if (isZero === 0) {
+      yield u8;
       break;
     }
-    str += String.fromCharCode(byte);
+    const nextChar = yield A.anyChar.errorMap(() => errorMsg);
+    out += nextChar;
   }
 
-  return updateResultAndIndex(state, str, state.index + offset);
-});
-
-const endOfInput = new Parser(state => {
-  if (isError(state)) return state;
-  if (canReadBytes(state, 1)) {
-    return updateError(state, `Expected end of input, but got ${state.target.getUint8(state.index)} instead`);
-  }
-  return updateResultAndIndex(state, null, state.index);
-});
-
-const everythingUntil = parser => new Parser(state => {
-  if (isError(state)) return state;
-  const collected = [];
-
-  let nextState = state;
-  while (true) {
-    const reachedEndState = parser.p(nextState);
-    if (!reachedEndState.isError) {
-      return updateResultAndIndex(nextState, collected, nextState.index);
-    }
-
-    if (!canReadBytes(nextState, 1)) {
-      return updateError(nextState, `everythingUntil: Unexpected end of input`);
-    }
-
-    collected.push(nextState.target.getUint8(nextState.index));
-    nextState = updateResultAndIndex(nextState, null, nextState.index + 1);
-  }
-});
-
-const anythingExcept = exceptionParser => new Parser(state => {
-  if (isError(state)) return state;
-  const exceptionState = exceptionParser.p(state);
-  if (!exceptionState.isError) {
-    return updateError(state, `anythingExcept: Matched ${exceptionState.result} from the exception parser`);
+  if (out.length === 0) {
+    yield A.fail('nullTerminatedString: No data before null terminator');
   }
 
-  const byte = state.target.getUint8(state.index);
-  return updateResultAndIndex(state, byte, state.index + 1);
+  return out;
 });
 
 module.exports = {
@@ -140,9 +87,5 @@ module.exports = {
   exactU32BE,
   exactS32LE,
   exactS32BE,
-  rawString,
   nullTerminatedString,
-  endOfInput,
-  everythingUntil,
-  anythingExcept,
 };

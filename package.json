@@ -1,6 +1,6 @@
 {
   "name": "arcsecond-binary",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "arcsecond parsers for binary data",
   "main": "src/index.js",
   "scripts": {
@@ -10,11 +10,11 @@
   "author": "Francis Stokes",
   "license": "MIT",
   "peerDependencies": {
-    "arcsecond": ">=2.0.4"
+    "arcsecond": ">=3.0.0"
   },
   "dependencies": {},
   "devDependencies": {
-    "arcsecond": "^2.0.4",
+    "arcsecond": "^3.0.0",
     "chai": "^4.2.0",
     "mocha": "^8.1.0",
     "nyc": "^15.1.0"
