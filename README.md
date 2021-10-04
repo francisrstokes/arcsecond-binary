@@ -2,7 +2,7 @@
 
 <img src="./logo.png">
 
-Binary parsers for <a href="https://github.com/francisrstokes/arcsecond">arcsecond v3</a>!
+Binary parsers for <a href="https://github.com/francisrstokes/arcsecond">arcsecond</a>!
 
 Before opening an issue, check to see if your question has been answered in the [FAQ](./faq.md)!
 
